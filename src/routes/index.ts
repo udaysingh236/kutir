@@ -14,7 +14,7 @@ const router = express.Router();
  *         description: App is up and running
  */
 router.get('/healthcheck', (req, res) => {
-    res.status(200).send('Hello from Kutir, I am alive..!!')
-})
+    res.status(200).send('Hello from Kutir, I am alive..!!');
+});
 
 export default router;

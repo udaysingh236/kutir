@@ -1,17 +1,18 @@
 import { Express, Request, Response } from 'express-serve-static-core';
 import swaggerJsdoc from 'swagger-jsdoc';
-import swaggerUi  from 'swagger-ui-express';
+import swaggerUi from 'swagger-ui-express';
+import { logger } from './logger';
 
 const options: swaggerJsdoc.Options = {
     definition: {
-        openapi: "3.0.0",
+        openapi: '3.0.0',
         info: {
-            title: "Kutir, Hotel Management Tool",
-            version: "1.0.0"
+            title: 'Kutir, Hotel Management Tool',
+            version: '1.0.0'
         }
     },
-    apis: ["./src/routes/index.ts"]
-}
+    apis: ['./src/routes/index.ts']
+};
 
 const swaggerSpecs = swaggerJsdoc(options);
 
@@ -21,11 +22,11 @@ const generateSwaggerDocs = (app: Express, port: string | number) => {
 
     // Swagger Json Docs
     app.use('/v1/docs.json', (req: Request, res: Response) => {
-        res.setHeader("Content-Type", "application/json");
+        res.setHeader('Content-Type', 'application/json');
         res.send(swaggerSpecs);
-    })
-    console.log(`API UI Docs available at http://localhost:${port}/v1/api-docs`);
-    console.log(`Docs available at http://localhost:${port}/v1/docs.json`);
-}
+    });
+    logger.info(`API UI Docs available at http://localhost:${port}/v1/api-docs`);
+    logger.info(`Docs available at http://localhost:${port}/v1/docs.json`);
+};
 
 export default generateSwaggerDocs;
