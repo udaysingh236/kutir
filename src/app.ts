@@ -5,6 +5,8 @@ import swaggerDocs from './utils/swagger';
 const app = express();
 const port = process.env.port || 3000;
 
+app.use(express.json());
+
 swaggerDocs(app, port);
 app.use('/v1/', indexRouter);
 app.use('/v1/hotels', hotelRouter);

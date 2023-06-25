@@ -3,3 +3,8 @@ export interface IHotelsData {
     status: number;
     allHotelsData?: Array<IHotel>;
 }
+
+export interface IHotelData {
+    status: number;
+    hotelData?: IHotel;
+}

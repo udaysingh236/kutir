@@ -1,4 +1,4 @@
-import { Document, model, Schema, Types } from 'mongoose';
+import { Document, Model, model, Schema, Types } from 'mongoose';
 
 export interface IHotel extends Document {
     name: string;
@@ -12,6 +12,9 @@ interface IStaffInfo {
 }
 
 const hotelSchema: Schema = new Schema({
+    _id: {
+        type: Number
+    },
     name: {
         type: String,
         required: true
@@ -30,6 +33,6 @@ const hotelSchema: Schema = new Schema({
     }
 });
 
-const Hotel = model<IHotel>('Hotel', hotelSchema);
+const Hotel: Model<IHotel> = model<IHotel>('Hotel', hotelSchema);
 
 export default Hotel;
