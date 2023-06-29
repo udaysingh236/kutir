@@ -47,7 +47,7 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.get('/:hotelId', async (req: Request, res: Response) => {
     logger.trace(`GET ${req.url}`);
-    const hotelId = parseInt(req.params.hotelId);
+    const hotelId = Number(req.params.hotelId);
     if (Number.isNaN(hotelId)) {
         logger.error(`Received invalid type of Hotel ID, route ${req.url}`);
         return res.status(400).send('Hotel ID type should be number.');

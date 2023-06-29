@@ -7,6 +7,12 @@ export interface IHotel extends Document {
     staffInfo: Array<IStaffInfo>;
 }
 
+export interface IEmployee extends Document {
+    name: string;
+    address: string;
+    employeeInfo: Array<object>;
+}
+
 interface IStaffInfo {
     _id: Types.ObjectId;
 }
