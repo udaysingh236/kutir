@@ -20,7 +20,7 @@ router.get('/', async (req: Request, res: Response) => {
     if (allHotelsDataRes.status === 200) {
         res.status(allHotelsDataRes.status).send(allHotelsDataRes.allHotelsData);
     } else {
-        res.status(allHotelsDataRes.status);
+        res.status(allHotelsDataRes.status).send('Not able to find hotel Data');
     }
 });
 
