@@ -4,6 +4,8 @@ import indexRouter from './routes/index';
 import hotelRouter from './routes/hotels';
 import roomRouter from './routes/rooms';
 import employeeRouter from './routes/employee';
+import couponRouter from './routes/coupons';
+import voucherRouter from './routes/vouchers';
 import swaggerDocs from './utils/swagger';
 const app = express();
 const port = process.env.port || 3000;
@@ -15,5 +17,7 @@ app.use('/v1/', indexRouter);
 app.use('/v1/hotels', hotelRouter);
 app.use('/v1/hotels', roomRouter);
 app.use('/v1/hotels', employeeRouter);
+app.use('/v1/hotels', couponRouter);
+app.use('/v1/hotels', voucherRouter);
 
 export default app;

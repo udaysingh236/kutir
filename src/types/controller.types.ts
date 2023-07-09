@@ -1,5 +1,7 @@
 import { IHotel, IEmployee } from '../models/hotels.model';
 import { IRoom } from '../models/rooms.model';
+import { ICoupons } from '../models/coupons.model';
+import { IVouchers } from '../models/vouchers.model';
 export interface IHotelsData {
     status: number;
     allHotelsData?: Array<IHotel>;
@@ -23,4 +25,24 @@ export interface IRoomData {
 export interface IEmployeeData {
     status: number;
     employeeData?: Array<IEmployee>;
+}
+
+export interface ICouponsData {
+    status: number;
+    couponsData?: Array<ICoupons>;
+}
+
+export interface ICouponData {
+    status: number;
+    couponData?: ICoupons | null;
+}
+
+export interface IVouchersData {
+    status: number;
+    vouchersData?: Array<IVouchers>;
+}
+
+export interface IVoucherData {
+    status: number;
+    voucherData?: IVouchers | null;
 }

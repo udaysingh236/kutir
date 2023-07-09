@@ -8,31 +8,34 @@ export interface IRoom extends Document {
     numPerson: number;
 }
 
-const roomSchema: Schema = new Schema({
-    _id: {
-        type: Number
+const roomSchema: Schema = new Schema(
+    {
+        _id: {
+            type: Number
+        },
+        roomNumber: {
+            type: Number,
+            required: true
+        },
+        roomType: {
+            type: Number,
+            required: true
+        },
+        hotelId: {
+            type: Number,
+            required: true
+        },
+        maxMattress: {
+            type: Number,
+            required: true
+        },
+        numPerson: {
+            type: Number,
+            required: true
+        }
     },
-    roomNumber: {
-        type: Number,
-        required: true
-    },
-    roomType: {
-        type: Number,
-        required: true
-    },
-    hotelId: {
-        type: Number,
-        required: true
-    },
-    maxMattress: {
-        type: Number,
-        required: true
-    },
-    numPerson: {
-        type: Number,
-        required: true
-    }
-});
+    { timestamps: true }
+);
 
 const Room: Model<IRoom> = model<IRoom>('Room', roomSchema);
 

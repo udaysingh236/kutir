@@ -17,27 +17,30 @@ interface IStaffInfo {
     _id: Types.ObjectId;
 }
 
-const hotelSchema: Schema = new Schema({
-    _id: {
-        type: Number
+const hotelSchema: Schema = new Schema(
+    {
+        _id: {
+            type: Number
+        },
+        name: {
+            type: String,
+            required: true
+        },
+        address: {
+            type: String,
+            required: true
+        },
+        totalRooms: {
+            type: Array,
+            required: true
+        },
+        staffInfo: {
+            type: Array,
+            required: true
+        }
     },
-    name: {
-        type: String,
-        required: true
-    },
-    address: {
-        type: String,
-        required: true
-    },
-    totalRooms: {
-        type: Array,
-        required: true
-    },
-    staffInfo: {
-        type: Array,
-        required: true
-    }
-});
+    { timestamps: true }
+);
 
 const Hotel: Model<IHotel> = model<IHotel>('Hotel', hotelSchema);
 
