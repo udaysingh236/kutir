@@ -31,7 +31,7 @@ export async function getVoucherInfo(hotelId: number, voucherCode: string): Prom
         });
         if (Object.keys(voucherData ?? {}).length === 0) {
             logger.info(
-                `Not able to find voucher's info for hotel ID ${hotelId} and coupon code ${voucherCode}`
+                `Not able to find voucher's info for hotel ID ${hotelId} and voucher code ${voucherCode}`
             );
             return {
                 status: 404

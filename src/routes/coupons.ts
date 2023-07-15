@@ -64,7 +64,7 @@ router.get('/:hotelId/coupons', async (req: Request, res: Response) => {
  *  post:
  *     tags:
  *     - Coupons
- *     description: Create a coupon for an hotel
+ *     description: Create a coupon for a hotel
  *     parameters:
  *      - in: path
  *        name: hotelId
