@@ -6,7 +6,6 @@ import serverless, { Handler } from 'serverless-http';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const mongoUri: string = process.env.MONGO_URI!;
-
 const handler = serverless(app);
 module.exports.handler = async (event: Handler, context: Handler) => {
     // Make sure to add this so you can re-use `conn` between function calls.
@@ -14,8 +13,13 @@ module.exports.handler = async (event: Handler, context: Handler) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore:
     context.callbackWaitsForEmptyEventLoop = false;
-    // await mongoose.connect(mongoUri);
-    logger.info(`Connected to MongoDB from Lambda handler`);
+    logger.info(`Mongo ready state ${mongoose.connection.readyState}`);
+    if (mongoose.connection.readyState === 0) {
+        await mongoose.connect(mongoUri);
+        logger.info(
+            `Mongo was disconnected, trying again, Connected to MongoDB from Lambda handler`
+        );
+    }
     const result = await handler(event, context);
     return result;
 };

@@ -11,7 +11,7 @@ const options: swaggerJsdoc.Options = {
             version: '1.0.0'
         }
     },
-    apis: ['./src/routes/*.ts', './routes/*.js']
+    apis: ['./src/routes/*.ts', './routes/*.js'] //one for local and one for lambda
 };
 
 const swaggerSpecs = swaggerJsdoc(options);
