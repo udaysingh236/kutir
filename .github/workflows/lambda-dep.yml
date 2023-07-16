@@ -32,8 +32,8 @@ jobs:
         npm run build --if-present
         npm run test --if-present
 
-    - name: Install dependencies, Build application and Zip dist folder contents
-      run: npm install && npm run build && cp -r ./node_modules dist && cd dist && zip -qq -r ./bundle.zip . && mv bundle.zip ..
+    - name: Move node_modules to dist and Zip dist folder contents
+      run: (mv node_modules dist/node_modules && cd dist && zip -qq -r ../bundle.zip .)
 
     - name: deploy zip to aws lambda
       uses: appleboy/lambda-action@master
