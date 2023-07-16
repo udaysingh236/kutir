@@ -9,7 +9,7 @@
     "lint": "eslint  --ext .ts,.js .",
     "lint:fix": "eslint --ext .ts,.js . --fix",
     "build": "tsc -p tsconfig.build.json",
-    "dev": "npm run build && node ./dist/src/server.js"
+    "dev": "npm run build && node ./dist/server.js"
   },
   "repository": {
     "type": "git",
