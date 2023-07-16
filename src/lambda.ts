@@ -13,8 +13,8 @@ module.exports.handler = async (event: Handler, context: Handler) => {
     // See https://www.mongodb.com/blog/post/serverless-development-with-nodejs-aws-lambda-mongodb-atlas
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore:
-    // context.callbackWaitsForEmptyEventLoop = false;
-    await mongoose.connect(mongoUri);
+    context.callbackWaitsForEmptyEventLoop = false;
+    // await mongoose.connect(mongoUri);
     logger.info(`Connected to MongoDB from Lambda handler`);
     const result = await handler(event, context);
     return result;
