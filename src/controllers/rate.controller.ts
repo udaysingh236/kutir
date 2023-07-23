@@ -49,6 +49,37 @@ export async function getRoomRates(hotelId: number, roomId: number): Promise<IRa
     }
 }
 
+export async function getMultipleRoomRates(
+    hotelId: number,
+    roomIds: number[]
+): Promise<IRatesData> {
+    try {
+        const ratesData: Array<IRates> = await Rates.find({
+            hotelId: hotelId,
+            roomId: {
+                $in: [...roomIds]
+            }
+        });
+        if (Object.keys(ratesData ?? {}).length === 0) {
+            logger.info(
+                `Not able to find Rate's info for hotel ID ${hotelId} and room Ids ${roomIds}`
+            );
+            return {
+                status: 404
+            };
+        }
+        return {
+            status: 200,
+            ratesData: ratesData
+        };
+    } catch (error) {
+        logger.error(`Error in getMultipleRoomRates, error is ${error}`);
+        return {
+            status: 404
+        };
+    }
+}
+
 export async function createRate(ratesInfo: object): Promise<IRateData> {
     try {
         await Rates.create(ratesInfo);

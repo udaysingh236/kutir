@@ -3,6 +3,9 @@ import { IRoom } from '../models/rooms.model';
 import { ICoupons } from '../models/coupons.model';
 import { IVouchers } from '../models/vouchers.model';
 import { IRates } from '../models/rates.model';
+import { IReservations } from '../models/reservations.model';
+import { IAvailability } from '../models/availability.models';
+import { IGuests } from '../models/guests.model';
 export interface IHotelsData {
     status: number;
     allHotelsData?: Array<IHotel>;
@@ -56,4 +59,89 @@ export interface IRatesData {
 export interface IRateData {
     status: number;
     rateData?: IRates | null;
+}
+
+export interface IAvailabilityData {
+    status: number;
+    availabilityData?: Array<IAvailability>;
+}
+
+export interface IGuestsData {
+    status: number;
+    guestsData?: Array<IGuests>;
+}
+
+export interface IReservationsData {
+    status: number;
+    reservationsData?: Array<IReservations>;
+}
+
+export interface IReservationData {
+    status: number;
+    reservationData?: IReservations | null;
+}
+
+export interface IRateShopPayload {
+    roomIds: number[];
+    checkIn: Date;
+    checkOut: Date;
+    couponCode?: string;
+    voucherCode?: string;
+    numOfPersons: number;
+    numOfextraMattress: number;
+}
+
+export interface IReservationsPayload extends IRateShopPayload {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNum: number;
+    identityNum: string;
+    paymentDetails: {
+        advancePayment: number;
+        advancePaymentMode: string;
+    };
+}
+
+export interface IRateShopSchema {
+    hotelId: number;
+    roomIds: number[];
+    checkIn: Date;
+    checkOut: Date;
+    couponCode?: string;
+    voucherCode?: string;
+    numOfPersons: number;
+    numOfextraMattress: number;
+    rates: {
+        perDayCharge: number;
+        earlyCheckIn: number;
+        lateCheckOut: number;
+        extraMattress: number;
+    };
+    chargesDetails: {
+        totalNumDays: number;
+        earlyCheckIn?: number;
+        waiveEarlyCheckInRates?: boolean;
+        waiveLateCheckOutRates?: boolean;
+        lateCheckOut?: number;
+        extraMattress: number;
+        couponDisPercentage: number;
+        voucherAmount: number;
+    };
+}
+
+export interface IReservationSchema extends IRateShopSchema {
+    guestId: string;
+    currentStatus: string;
+    confirmationType: string;
+    createdBy?: string;
+    paymentDetails: {
+        advancePayment: number;
+        advancePaymentMode: string;
+    };
+}
+
+export interface IRateShopResponse {
+    status: number;
+    rateShopResponse?: IRateShopSchema;
 }

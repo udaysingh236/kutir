@@ -17,6 +17,6 @@ const vouchersSchema: Schema = new Schema(
     { timestamps: true }
 );
 
-const Vouchers: Model<IVouchers> = model<IVouchers>('Vouchers', vouchersSchema);
+const Vouchers: Model<IVouchers> = model<IVouchers>('Voucher', vouchersSchema);
 
 export default Vouchers;

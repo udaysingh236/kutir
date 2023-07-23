@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* global use, db */
 // MongoDB Playground
 // To disable this template go to Settings | MongoDB | Use Default Template For Playground.
@@ -10,7 +11,13 @@
 // https://www.mongodb.com/docs/mongodb-vscode/playgrounds/
 
 // Select the database to use.
-use('kutir_data');
+use('test');
+
+// db.hotels.insertOne({ checkIn: new Date() });
+// db.hotels.insertOne({ checkIn: new ISODate('2023-07-16') });
+
+// db.hotels.find({ checkIn: { $gte: new Date('2023-07-16') } });
+db.hotels.find({ _id: ObjectId('64b41726f1277f96bf7ec6c0') });
 
 // Here we run an aggregation and open a cursor to the results.
 // Use '.toArray()' to exhaust the cursor to return the whole result set.
@@ -28,45 +35,45 @@ use('kutir_data');
 //     db.rooms.replaceOne({ _id: element['_id'] }, element);
 // }
 
-let valueMatch = new RegExp('tt');
-db.hotels.aggregate([
-    { $match: { _id: 10 } },
-    {
-        $addFields: {
-            employeeObjectId: {
-                $map: {
-                    input: '$staffInfo',
-                    as: 'r',
-                    in: { $toObjectId: '$$r._id' }
-                }
-            }
-        }
-    },
-    {
-        $lookup: {
-            from: 'employees',
-            localField: 'employeeObjectId',
-            foreignField: '_id',
-            as: 'employeesInfo'
-        }
-    },
-    { $unwind: '$employeesInfo' },
-    {
-        $match: {
-            $or: [
-                { 'employeesInfo.firstName': { $regex: valueMatch } },
-                { 'employeesInfo.lastName': { $regex: valueMatch } }
-            ]
-        }
-    },
-    {
-        $project: {
-            employeeObjectId: 0,
-            staffInfo: 0,
-            totalRooms: 0
-        }
-    }
-]);
+// let valueMatch = new RegExp('tt');
+// db.hotels.aggregate([
+//     { $match: { _id: 10 } },
+//     {
+//         $addFields: {
+//             employeeObjectId: {
+//                 $map: {
+//                     input: '$staffInfo',
+//                     as: 'r',
+//                     in: { $toObjectId: '$$r._id' }
+//                 }
+//             }
+//         }
+//     },
+//     {
+//         $lookup: {
+//             from: 'employees',
+//             localField: 'employeeObjectId',
+//             foreignField: '_id',
+//             as: 'employeesInfo'
+//         }
+//     },
+//     { $unwind: '$employeesInfo' },
+//     {
+//         $match: {
+//             $or: [
+//                 { 'employeesInfo.firstName': { $regex: valueMatch } },
+//                 { 'employeesInfo.lastName': { $regex: valueMatch } }
+//             ]
+//         }
+//     },
+//     {
+//         $project: {
+//             employeeObjectId: 0,
+//             staffInfo: 0,
+//             totalRooms: 0
+//         }
+//     }
+// ]);
 
 // db.hotels.aggregate([
 //     { $match: { _id: 100 } },

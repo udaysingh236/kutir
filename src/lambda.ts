@@ -8,7 +8,7 @@ import serverless, { Handler } from 'serverless-http';
 const mongoUri: string = process.env.MONGO_URI!;
 const handler = serverless(app);
 module.exports.handler = async (event: Handler, context: Handler) => {
-    // Make sure to add this so you can re-use `conn` between function calls.
+    // Make sure to add this so you can re-use mongo connection between function calls.
     // See https://www.mongodb.com/blog/post/serverless-development-with-nodejs-aws-lambda-mongodb-atlas
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore:
