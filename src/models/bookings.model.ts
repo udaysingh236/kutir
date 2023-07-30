@@ -88,7 +88,7 @@ const bookingsSchema: Schema = new Schema(
         hotelId: { type: Number, required: true },
         roomId: { type: Number, required: true },
         currentStatus: { type: String, required: true },
-        confirmationType: { type: String, required: true },
+        confirmationType: { type: String, required: true, default: 'grey' },
         checkIn: { type: Date, required: true },
         checkOut: { type: Date, required: true },
         totalNumDays: { type: Number, required: true },

@@ -263,7 +263,7 @@ export async function createRes(hotelId: number, resInfo: IReservationsPayload) 
             ...rateShopResponse.rateShopResponse!,
             guestId: '',
             currentStatus: '',
-            confirmationType: '',
+            confirmationType: 'grey',
             paymentDetails: {
                 advancePayment: 0,
                 advancePaymentMode: ''
@@ -291,7 +291,7 @@ export async function createRes(hotelId: number, resInfo: IReservationsPayload) 
             reservationSchema.paymentDetails.advancePayment = resInfo.paymentDetails.advancePayment;
             reservationSchema.paymentDetails.advancePaymentMode =
                 resInfo.paymentDetails.advancePaymentMode;
-            reservationSchema.confirmationType = 'GREEN';
+            reservationSchema.confirmationType = 'green';
         }
         reservationSchema.currentStatus = 'ACTIVE';
 
