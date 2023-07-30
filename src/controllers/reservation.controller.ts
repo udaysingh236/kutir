@@ -12,7 +12,8 @@ import {
     IReservationsPayload,
     IRateShopResponse,
     IRateShopSchema,
-    IReservationSchema
+    IReservationSchema,
+    IAvailabilityData
 } from '../types/controller.types';
 
 export async function getAllActiveResOfHotel(hotelId: number): Promise<IReservationsData> {
@@ -42,8 +43,8 @@ export async function getAllActiveResOfHotel(hotelId: number): Promise<IReservat
 
 export async function getAllResByRange(
     hotelId: number,
-    fromDate: Date,
-    toDate: Date
+    fromDate: string,
+    toDate: string
 ): Promise<IReservationsData> {
     try {
         const formatFromDate = new Date(fromDate).toISOString().split('T')[0]; //YYYY-MM-DD
@@ -72,7 +73,10 @@ export async function getAllResByRange(
     }
 }
 
-export async function getAllResByDate(hotelId: number, resDate: Date): Promise<IReservationsData> {
+export async function getAllResByDate(
+    hotelId: number,
+    resDate: string
+): Promise<IReservationsData> {
     try {
         const formatResDate = new Date(resDate).toISOString().split('T')[0]; //YYYY-MM-DD
         const reservationsData: Array<IReservations> = await Reservations.find({
@@ -104,19 +108,37 @@ export async function doRateShoping(
     rateShopInfo: IRateShopPayload
 ): Promise<IRateShopResponse> {
     try {
-        // First the check the availability of the Room for given date range again:
+        // First check the availability of the Room for given date range again:
         const fromDate = new Date(rateShopInfo.checkIn).toISOString().split('T')[0]; //YYYY-MM-DD
         const toDate = new Date(rateShopInfo.checkOut).toISOString().split('T')[0]; //YYYY-MM-DD
+        let maxNumOfPersonInRoom = 0;
+        let maxNumOfMattressInRoom = 0;
         for (let index = 0; index < rateShopInfo.roomIds.length; index++) {
-            const roomAvailbility = await availabilityController.getAvailbilityByRoom(
-                hotelId,
-                rateShopInfo.roomIds[index],
-                fromDate,
-                toDate
-            );
+            const roomAvailbility: IAvailabilityData =
+                await availabilityController.getAvailbilityByRoom(
+                    hotelId,
+                    rateShopInfo.roomIds[index],
+                    fromDate,
+                    toDate
+                );
             if (roomAvailbility.status !== 200) {
                 logger.error(
-                    `Error while creating rate shop, room id ${rateShopInfo.roomIds[index]} is not available from range ${fromDate} - ${toDate}`
+                    `Error while rate shop, room id ${rateShopInfo.roomIds[index]} is not available from range ${fromDate} - ${toDate}`
+                );
+                return {
+                    status: 500
+                };
+            }
+            maxNumOfPersonInRoom +=
+                roomAvailbility.availabilityData?.[0].roomsInfo[0].numPerson ?? 0;
+            maxNumOfMattressInRoom +=
+                roomAvailbility.availabilityData?.[0].roomsInfo[0].maxMattress ?? 0;
+            if (
+                maxNumOfPersonInRoom < rateShopInfo.numOfPersons ||
+                maxNumOfMattressInRoom < rateShopInfo.numOfextraMattress
+            ) {
+                logger.error(
+                    `Error while rate shop, number of person ${rateShopInfo.numOfPersons} or number of mattress ${rateShopInfo.numOfextraMattress} is increasing room(s) capacity persons ${maxNumOfPersonInRoom}, extra mattress ${maxNumOfMattressInRoom}`
                 );
                 return {
                     status: 500
@@ -127,8 +149,9 @@ export async function doRateShoping(
         const rateShopResponse: IRateShopSchema = {
             hotelId: hotelId,
             roomIds: [...rateShopInfo.roomIds],
-            checkIn: new Date(rateShopInfo.checkIn),
-            checkOut: new Date(rateShopInfo.checkOut),
+            checkIn: new Date(rateShopInfo.checkIn).toISOString().split('T')[0],
+            checkOut: new Date(rateShopInfo.checkOut).toISOString().split('T')[0],
+            totalNumDays: 0,
             couponCode: rateShopInfo.couponCode ?? undefined,
             voucherCode: rateShopInfo.voucherCode ?? undefined,
             numOfPersons: rateShopInfo.numOfPersons,
@@ -140,7 +163,7 @@ export async function doRateShoping(
                 extraMattress: 0
             },
             chargesDetails: {
-                totalNumDays: 0,
+                totalDaysCharge: 0,
                 earlyCheckIn: undefined,
                 waiveEarlyCheckInRates: undefined,
                 waiveLateCheckOutRates: undefined,
@@ -169,17 +192,23 @@ export async function doRateShoping(
         // Lets calulate number of days
         const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
         const diffDays = Math.round(
-            Math.abs((+rateShopResponse.checkOut - +rateShopResponse.checkIn) / oneDay)
+            Math.abs(
+                (+new Date(rateShopResponse.checkOut) - +new Date(rateShopResponse.checkIn)) /
+                    oneDay
+            )
         );
         if (diffDays <= 0) {
             logger.error(
-                `Error while creating rate shop, date diff is ${diffDays} from range ${fromDate} - ${toDate}`
+                `Error while rate shop, date diff is ${diffDays} from range ${fromDate} - ${toDate}`
             );
             return {
                 status: 500
             };
         }
-        rateShopResponse.chargesDetails.totalNumDays = diffDays;
+        logger.info(`Total days difference: ${diffDays}`);
+        rateShopResponse.totalNumDays = diffDays;
+        rateShopResponse.chargesDetails.totalDaysCharge =
+            diffDays * rateShopResponse.rates.perDayCharge;
         rateShopResponse.chargesDetails.extraMattress =
             rateShopResponse.rates.extraMattress * rateShopInfo.numOfextraMattress;
         // check voucher
@@ -224,7 +253,10 @@ export async function createRes(hotelId: number, resInfo: IReservationsPayload) 
     try {
         const rateShopResponse: IRateShopResponse = await doRateShoping(hotelId, resInfo);
         if (rateShopResponse.status !== 200) {
-            throw new Error('Error doing rate shopping');
+            logger.error('Error doing rate shopping');
+            return {
+                status: 500
+            };
         }
         const reservationSchema: IReservationSchema = {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -241,19 +273,21 @@ export async function createRes(hotelId: number, resInfo: IReservationsPayload) 
         session.startTransaction();
         // create the guest profile and do the reservation
         const createGuestData = await Guests.create(
-            {
-                hotelId: hotelId,
-                firstName: resInfo.firstName,
-                lastName: resInfo.lastName,
-                email: resInfo.email,
-                phoneNum: resInfo.phoneNum,
-                identityNum: resInfo.identityNum
-            },
+            [
+                {
+                    hotelId: hotelId,
+                    firstName: resInfo.firstName,
+                    lastName: resInfo.lastName,
+                    email: resInfo.email,
+                    phoneNum: resInfo.phoneNum,
+                    identityNum: resInfo.identityNum
+                }
+            ],
             { session }
         );
         logger.info(`createGuestData ${JSON.stringify(createGuestData)}`);
-        reservationSchema.guestId = '123'; //For NOW
-        if (resInfo.paymentDetails.advancePayment >= 0) {
+        reservationSchema.guestId = createGuestData[0]._id; //For NOW
+        if (resInfo.paymentDetails.advancePayment > 0) {
             reservationSchema.paymentDetails.advancePayment = resInfo.paymentDetails.advancePayment;
             reservationSchema.paymentDetails.advancePaymentMode =
                 resInfo.paymentDetails.advancePaymentMode;
@@ -277,7 +311,7 @@ export async function createRes(hotelId: number, resInfo: IReservationsPayload) 
                             restoDate: toDate,
                             resfromDate: fromDate,
                             resType: reservationSchema.confirmationType,
-                            reservationId: '12345'
+                            reservationId: createReservationRes[0]._id
                         }
                     }
                 },

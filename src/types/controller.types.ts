@@ -4,7 +4,7 @@ import { ICoupons } from '../models/coupons.model';
 import { IVouchers } from '../models/vouchers.model';
 import { IRates } from '../models/rates.model';
 import { IReservations } from '../models/reservations.model';
-import { IAvailability } from '../models/availability.models';
+import { IAvailabilityWithRooms } from '../models/availability.models';
 import { IGuests } from '../models/guests.model';
 export interface IHotelsData {
     status: number;
@@ -63,7 +63,7 @@ export interface IRateData {
 
 export interface IAvailabilityData {
     status: number;
-    availabilityData?: Array<IAvailability>;
+    availabilityData?: Array<IAvailabilityWithRooms>;
 }
 
 export interface IGuestsData {
@@ -83,8 +83,8 @@ export interface IReservationData {
 
 export interface IRateShopPayload {
     roomIds: number[];
-    checkIn: Date;
-    checkOut: Date;
+    checkIn: string;
+    checkOut: string;
     couponCode?: string;
     voucherCode?: string;
     numOfPersons: number;
@@ -106,8 +106,9 @@ export interface IReservationsPayload extends IRateShopPayload {
 export interface IRateShopSchema {
     hotelId: number;
     roomIds: number[];
-    checkIn: Date;
-    checkOut: Date;
+    checkIn: string;
+    checkOut: string;
+    totalNumDays: number;
     couponCode?: string;
     voucherCode?: string;
     numOfPersons: number;
@@ -119,7 +120,7 @@ export interface IRateShopSchema {
         extraMattress: number;
     };
     chargesDetails: {
-        totalNumDays: number;
+        totalDaysCharge: number;
         earlyCheckIn?: number;
         waiveEarlyCheckInRates?: boolean;
         waiveLateCheckOutRates?: boolean;

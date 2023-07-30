@@ -27,6 +27,14 @@ use('kutir_data');
 //     { upsert: true }
 // );
 
+for (let index = 1; index <= 20; index++) {
+    db.roomavls.insertOne({
+        hotelId: 1,
+        roomId: index,
+        reservations: []
+    });
+}
+
 // db.reservations.insertMany([
 //     {
 //         roomNum: 1,
@@ -41,23 +49,23 @@ use('kutir_data');
 //     }
 // ]);
 
-const fromDate = new Date('2023-07-23');
-const toDate = new Date('2023-07-25');
+// const fromDate = new Date('2023-07-23');
+// const toDate = new Date('2023-07-25');
 
-db.roomavls.aggregate([
-    {
-        $match: {
-            reservations: {
-                $not: {
-                    $elemMatch: {
-                        restoDate: { $gt: fromDate },
-                        resfromDate: { $lt: toDate }
-                    }
-                }
-            }
-        }
-    },
-    {
-        $lookup: { from: 'rooms', localField: 'roomId', foreignField: '_id', as: 'roomsInfo' }
-    }
-]);
+// db.roomavls.aggregate([
+//     {
+//         $match: {
+//             reservations: {
+//                 $not: {
+//                     $elemMatch: {
+//                         restoDate: { $gt: fromDate },
+//                         resfromDate: { $lt: toDate }
+//                     }
+//                 }
+//             }
+//         }
+//     },
+//     {
+//         $lookup: { from: 'rooms', localField: 'roomId', foreignField: '_id', as: 'roomsInfo' }
+//     }
+// ]);

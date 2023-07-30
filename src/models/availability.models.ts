@@ -1,4 +1,5 @@
 import { Document, Model, model, Schema } from 'mongoose';
+import { IRoom } from './rooms.model';
 
 export interface IAvailability extends Document {
     hotelId: number;
@@ -9,6 +10,10 @@ export interface IAvailability extends Document {
         resType: string;
         reservationId: string;
     }[];
+}
+
+export interface IAvailabilityWithRooms extends IAvailability {
+    roomsInfo: IRoom[];
 }
 
 const availabilitySchema: Schema = new Schema(

@@ -1,4 +1,4 @@
-import Availability, { IAvailability } from '../models/availability.models';
+import Availability, { IAvailabilityWithRooms } from '../models/availability.models';
 import { logger } from '../utils/logger';
 import { IAvailabilityData } from '../types/controller.types';
 
@@ -7,7 +7,7 @@ export async function getAllAvailableRooms(
     fromDate: string,
     toDate: string
 ): Promise<IAvailabilityData> {
-    const availabilityData: Array<IAvailability> = await Availability.aggregate()
+    const availabilityData: Array<IAvailabilityWithRooms> = await Availability.aggregate()
         .match({
             hotelId: hotelId,
             reservations: {
@@ -40,7 +40,7 @@ export async function getAvailbilityByRoom(
     fromDate: string,
     toDate: string
 ): Promise<IAvailabilityData> {
-    const availabilityData: Array<IAvailability> = await Availability.aggregate()
+    const availabilityData: Array<IAvailabilityWithRooms> = await Availability.aggregate()
         .match({
             hotelId: hotelId,
             roomId: roomId,

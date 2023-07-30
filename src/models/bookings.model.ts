@@ -7,6 +7,7 @@ export interface IBookings extends Document {
     confirmationType: string;
     checkIn: Date;
     checkOut: Date;
+    totalNumDays: number;
     guestId: string;
     createdBy: string;
     couponCode?: string;
@@ -19,7 +20,7 @@ export interface IBookings extends Document {
     };
     numOfPersons: number;
     chargesDetails: {
-        totalNumDays: number;
+        totalDaysCharge: number;
         earlyCheckIn?: number;
         waiveEarlyCheckInRates?: boolean;
         waiveLateCheckOutRates?: boolean;
@@ -72,7 +73,7 @@ const paymentDetailsSchema: Schema = new Schema({
 });
 
 const chargesSchema: Schema = new Schema({
-    totalNumDays: { type: Number, required: true },
+    totalDaysCharge: { type: Number, required: true },
     earlyCheckIn: { type: Number, required: false },
     waiveEarlyCheckInRates: { type: Boolean, required: false },
     waiveLateCheckOutRates: { type: Boolean, required: false },
@@ -90,8 +91,9 @@ const bookingsSchema: Schema = new Schema(
         confirmationType: { type: String, required: true },
         checkIn: { type: Date, required: true },
         checkOut: { type: Date, required: true },
+        totalNumDays: { type: Number, required: true },
         guestId: { type: String, required: true },
-        createdBy: { type: String, required: true },
+        createdBy: { type: String, required: true, default: 'Uday' },
         couponCode: { type: String, required: false },
         voucherCode: { type: String, required: false },
         rates: {
