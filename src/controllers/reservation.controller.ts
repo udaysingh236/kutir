@@ -1,6 +1,6 @@
 import Reservations, { IReservations } from '../models/reservations.model';
 import Guests from '../models/guests.model';
-import Availability from '../models/availability.models';
+import Availability from '../models/availability.model';
 import * as availabilityController from './availability.controller';
 import * as rateController from './rate.controller';
 import * as voucherController from './voucher.controller';

@@ -4,7 +4,7 @@ import { ICoupons } from '../models/coupons.model';
 import { IVouchers } from '../models/vouchers.model';
 import { IRates } from '../models/rates.model';
 import { IReservations } from '../models/reservations.model';
-import { IAvailabilityWithRooms } from '../models/availability.models';
+import { IAvailabilityWithRooms } from '../models/availability.model';
 import { IGuests } from '../models/guests.model';
 export interface IHotelsData {
     status: number;

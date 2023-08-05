@@ -1,4 +1,4 @@
-import Availability, { IAvailabilityWithRooms } from '../models/availability.models';
+import Availability, { IAvailabilityWithRooms } from '../models/availability.model';
 import { logger } from '../utils/logger';
 import { IAvailabilityData } from '../types/controller.types';
 

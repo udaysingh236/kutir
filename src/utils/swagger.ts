@@ -16,12 +16,13 @@ const options: swaggerJsdoc.Options = {
 
 const swaggerSpecs = swaggerJsdoc(options);
 
-const generateSwaggerDocs = (app: Express, port: string | number) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const generateSwaggerDocs = (app: Express, port: string | number, loginCheckMiddle: any) => {
     // Swagger UI Docs
-    app.use('/v1/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+    app.use('/v1/api-docs', loginCheckMiddle, swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
     // Swagger Json Docs
-    app.use('/v1/docs.json', (req: Request, res: Response) => {
+    app.use('/v1/docs.json', loginCheckMiddle, (req: Request, res: Response) => {
         res.setHeader('Content-Type', 'application/json');
         res.send(swaggerSpecs);
     });

@@ -27,13 +27,13 @@ use('kutir_data');
 //     { upsert: true }
 // );
 
-for (let index = 1; index <= 20; index++) {
-    db.roomavls.insertOne({
-        hotelId: 1,
-        roomId: index,
-        reservations: []
-    });
-}
+// for (let index = 1; index <= 20; index++) {
+//     db.roomavls.insertOne({
+//         hotelId: 1,
+//         roomId: index,
+//         reservations: []
+//     });
+// }
 
 // db.reservations.insertMany([
 //     {
