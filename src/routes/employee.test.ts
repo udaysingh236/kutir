@@ -1,11 +1,20 @@
 import request from 'supertest';
-import app from '../app';
+import * as auth from '../services/auth.service';
 import * as employeeController from '../controllers/employee.controller';
+const mcheckUserLoggedIn = jest
+    .spyOn(auth, 'checkUserLoggedIn')
+    .mockImplementation((req, res, next) => {
+        req.user = 'john.doe'; //for testing bypassing the auth
+        if (!req.user) {
+            return res.status(401).send({
+                error: 'You are not logged in..!!'
+            });
+        }
+        next();
+    });
+import app from '../app'; //This should be in the last or after the mock
 
 describe('GET - Fetch employees details of a Hotel', () => {
-    afterAll(() => {
-        jest.resetAllMocks();
-    });
     test('Should return all employees details', async () => {
         const mgetHotelEmpDetails = jest
             .spyOn(employeeController, 'getHotelEmpDetails')
@@ -16,6 +25,7 @@ describe('GET - Fetch employees details of a Hotel', () => {
             );
 
         const res = await request(app).get('/v1/hotels/10/employees');
+        expect(mcheckUserLoggedIn).toHaveBeenCalled();
         expect(mgetHotelEmpDetails).toHaveBeenCalled();
         expect(res.status).toEqual(200);
     });
@@ -30,13 +40,14 @@ describe('GET - Fetch employees details of a Hotel', () => {
             );
 
         const res = await request(app).get('/v1/hotels/100/employees');
+        expect(mcheckUserLoggedIn).toHaveBeenCalled();
         expect(mgetHotelEmpDetails).toHaveBeenCalled();
         expect(res.status).toEqual(404);
         expect(res.text).toEqual('Not able to find employee data');
+        mgetHotelEmpDetails.mockReset();
     });
 
     test('Should return error message when hotel ID is string', async () => {
-        jest.resetAllMocks();
         const mgetHotelEmpDetails = jest
             .spyOn(employeeController, 'getHotelEmpDetails')
             .mockReturnValueOnce(
@@ -45,6 +56,7 @@ describe('GET - Fetch employees details of a Hotel', () => {
                 })
             );
         const res = await request(app).get('/v1/hotels/100AA/employees');
+        expect(mcheckUserLoggedIn).toHaveBeenCalled();
         expect(mgetHotelEmpDetails).not.toHaveBeenCalled();
         expect(res.status).toEqual(400); //intentionally keeping it different since the function is not getting called
         // If somehow it got called there is a double check and doube chance of failure.
@@ -53,9 +65,6 @@ describe('GET - Fetch employees details of a Hotel', () => {
 });
 
 describe('GET - Fetch employees details of a Hotel with employee name in query parameter', () => {
-    afterAll(() => {
-        jest.resetAllMocks();
-    });
     test('Should return all employees details matching the query string', async () => {
         const getHotelEmpDetailsByName = jest
             .spyOn(employeeController, 'getHotelEmpDetailsByName')
@@ -66,6 +75,7 @@ describe('GET - Fetch employees details of a Hotel with employee name in query p
             );
 
         const res = await request(app).get('/v1/hotels/10/employees?empName=tt');
+        expect(mcheckUserLoggedIn).toHaveBeenCalled();
         expect(getHotelEmpDetailsByName).toHaveBeenCalled();
         expect(res.status).toEqual(200);
     });
@@ -79,13 +89,14 @@ describe('GET - Fetch employees details of a Hotel with employee name in query p
                 })
             );
         const res = await request(app).get('/v1/hotels/100/employees?empName=tt');
+        expect(mcheckUserLoggedIn).toHaveBeenCalled();
         expect(mgetHotelEmpDetailsByName).toHaveBeenCalled();
         expect(res.status).toEqual(404);
         expect(res.text).toEqual('Not able to find employee data');
+        mgetHotelEmpDetailsByName.mockReset();
     });
 
     test('Should return error message when employee name doesnot contains only letters', async () => {
-        jest.resetAllMocks();
         const mgetHotelEmpDetailsByName = jest
             .spyOn(employeeController, 'getHotelEmpDetailsByName')
             .mockReturnValueOnce(
@@ -94,6 +105,7 @@ describe('GET - Fetch employees details of a Hotel with employee name in query p
                 })
             );
         const res = await request(app).get('/v1/hotels/10/employees?empName=tt33');
+        expect(mcheckUserLoggedIn).toHaveBeenCalled();
         expect(mgetHotelEmpDetailsByName).not.toHaveBeenCalled();
         //intentionally keeping it different since the function is not getting called
         // If somehow it got called there is a double check and doube chance of failure.

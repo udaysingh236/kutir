@@ -1,8 +1,9 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
+import 'dotenv/config'; //this we need for jest
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cookieSession from 'cookie-session';
-import passport from './services/passport';
+import passport from './services/passport.service';
 import indexRouter from './routes/index';
 import hotelRouter from './routes/hotels';
 import roomRouter from './routes/rooms';
@@ -14,7 +15,7 @@ import availbilityRouter from './routes/availability';
 import reservationRouter from './routes/reservation';
 import authRouter from './routes/auth';
 import swaggerDocs from './utils/swagger';
-import { logger } from './utils/logger';
+import * as auth from './services/auth.service';
 const app = express();
 const port = process.env.port || 3000;
 
@@ -30,29 +31,18 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-function checkUserLoggedIn(req: Request, res: Response, next: NextFunction) {
-    logger.debug(`Current user is ${req.user}`);
-    const isUserLoggedIn = req.isAuthenticated() && req.user;
-    if (!isUserLoggedIn) {
-        return res.status(401).send({
-            error: 'You are not logged in..!!'
-        });
-    }
-    next();
-}
-
 app.use(express.json());
 app.use(morgan('tiny'));
 app.use('/v1/auth', authRouter);
-swaggerDocs(app, port, checkUserLoggedIn);
-app.use('/v1/', checkUserLoggedIn, indexRouter);
-app.use('/v1/hotels', checkUserLoggedIn, hotelRouter);
-app.use('/v1/hotels', checkUserLoggedIn, roomRouter);
-app.use('/v1/hotels', checkUserLoggedIn, employeeRouter);
-app.use('/v1/hotels', checkUserLoggedIn, couponRouter);
-app.use('/v1/hotels', checkUserLoggedIn, voucherRouter);
-app.use('/v1/hotels', checkUserLoggedIn, rateRouter);
-app.use('/v1/hotels', checkUserLoggedIn, availbilityRouter);
-app.use('/v1/hotels', checkUserLoggedIn, reservationRouter);
+swaggerDocs(app, port, auth.checkUserLoggedIn);
+app.use('/v1/', auth.checkUserLoggedIn, indexRouter);
+app.use('/v1/hotels', auth.checkUserLoggedIn, hotelRouter);
+app.use('/v1/hotels', auth.checkUserLoggedIn, roomRouter);
+app.use('/v1/hotels', auth.checkUserLoggedIn, employeeRouter);
+app.use('/v1/hotels', auth.checkUserLoggedIn, couponRouter);
+app.use('/v1/hotels', auth.checkUserLoggedIn, voucherRouter);
+app.use('/v1/hotels', auth.checkUserLoggedIn, rateRouter);
+app.use('/v1/hotels', auth.checkUserLoggedIn, availbilityRouter);
+app.use('/v1/hotels', auth.checkUserLoggedIn, reservationRouter);
 
 export default app;
