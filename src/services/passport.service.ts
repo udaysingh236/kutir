@@ -5,9 +5,9 @@ import { logger } from '../utils/logger';
 const GoogleStrategy = passportGoogle.Strategy;
 
 const googleAuthConfig = {
-    clientID: process.env.GOOGLE_CLIENT_ID ?? '',
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
-    callbackURL: process.env.GOOGLE_CALLBACK_URL ?? ''
+    clientID: process.env.GOOGLE_CLIENT_ID ?? '123XYZ',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? 'XYZ',
+    callbackURL: process.env.GOOGLE_CALLBACK_URL ?? '/abc/'
 };
 
 passport.use(

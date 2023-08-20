@@ -1,5 +1,4 @@
 import express from 'express';
-import 'dotenv/config'; //this we need for jest
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cookieSession from 'cookie-session';
