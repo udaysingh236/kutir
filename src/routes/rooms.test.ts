@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import request from 'supertest';
 import * as auth from '../services/auth.service';
 import * as roomController from '../controllers/room.controller';
 const mcheckUserLoggedIn = jest
     .spyOn(auth, 'checkUserLoggedIn')
     .mockImplementation((req, res, next) => {
-        req.user = 'john.doe'; //for testing bypassing the auth
+        req.user!.username = 'john.doe'; //for testing bypassing the auth
         if (!req.user) {
             return res.status(401).send({
                 error: 'You are not logged in..!!'

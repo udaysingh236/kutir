@@ -1,8 +1,8 @@
-import express from 'express';
+import express, { Errback, Request, Response, NextFunction } from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cookieSession from 'cookie-session';
-import passport from './services/passport.service';
+import passport from './services/auth.service';
 import indexRouter from './routes/index';
 import hotelRouter from './routes/hotels';
 import roomRouter from './routes/rooms';
@@ -15,6 +15,7 @@ import reservationRouter from './routes/reservation';
 import authRouter from './routes/auth';
 import swaggerDocs from './utils/swagger';
 import * as auth from './services/auth.service';
+import { logger } from './utils/logger';
 const app = express();
 const port = process.env.port || 3000;
 
@@ -43,5 +44,14 @@ app.use('/v1/hotels', auth.checkUserLoggedIn, voucherRouter);
 app.use('/v1/hotels', auth.checkUserLoggedIn, rateRouter);
 app.use('/v1/hotels', auth.checkUserLoggedIn, availbilityRouter);
 app.use('/v1/hotels', auth.checkUserLoggedIn, reservationRouter);
+app.use((error: Errback, req: Request, res: Response, next: NextFunction) => {
+    if (error) {
+        logger.fatal(`Error middleware triggered, error was ${error}`);
+        res.clearCookie('kutir-session');
+        res.redirect('/v1/auth/github');
+    } else {
+        next();
+    }
+});
 
 export default app;
