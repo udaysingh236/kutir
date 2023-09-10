@@ -30,7 +30,7 @@ const router = express.Router();
  *      - in: query
  *        name: todayRes
  *        required: false
- *        type: boolean
+ *        type: string
  *        description: Today's date as reservation date
  *      - in: query
  *        name: specificDate
@@ -84,9 +84,9 @@ router.get('/:hotelId/reservation', async (req: Request, res: Response) => {
         Object.keys(req.query).length !== 0 &&
         Object.prototype.hasOwnProperty.call(req.query, 'todayRes')
     ) {
-        if (typeof req.query.todayRes !== 'boolean') {
-            logger.error(`Received invalid type of todayRes, route ${req.url}`);
-            return res.status(400).send('todayRes type should be Boolean.');
+        if (req.query.todayRes !== 'true') {
+            logger.error(`Received invalid input of todayRes, route ${req.url}`);
+            return res.status(400).send('todayRes should be true.');
         }
         const currDate = new Date().toISOString().split('T')[0]; //YYYY-MM-DD
         const reservationDataRes = await reservationController.getAllResByDate(hotelId, currDate);
@@ -270,6 +270,51 @@ router.post('/:hotelId/reservation', async (req: Request, res: Response) => {
         return res.status(reservationDataRes.status).send(reservationDataRes.createReservationRes);
     } else {
         return res.status(reservationDataRes.status).send('Not able to create reservations');
+    }
+});
+
+/**
+ * @openapi
+ * /v1/hotels/{hotelId}/reservation/{reservationId}/checkIn:
+ *  post:
+ *     tags:
+ *     - Reservation
+ *     description: Check In a Reservation.
+ *     parameters:
+ *      - in: path
+ *        name: hotelId
+ *        required: true
+ *        type: integer
+ *        description: The id of the hotel
+ *      - in: path
+ *        name: reservationId
+ *        required: true
+ *        type: string
+ *        description: The id of Reservation
+ *     responses:
+ *       201:
+ *         description: Reservation created sucessfully
+ *       400:
+ *         description: Received invalid request body.
+ *       500:
+ *         description: Internal server error.
+ */
+router.post('/:hotelId/reservation/:reservationId/checkIn', async (req: Request, res: Response) => {
+    const hotelId = Number(req.params.hotelId);
+    const reservationId = req.params.reservationId;
+    if (Number.isNaN(hotelId)) {
+        logger.error(`Received invalid type of Hotel ID, route ${req.url}`);
+        return res.status(400).send('Hotel ID type should be number.');
+    }
+    if (typeof reservationId !== 'string') {
+        logger.error(`Received invalid type of reservationId ID, route ${req.url}`);
+        return res.status(400).send('Reservation ID type should be number.');
+    }
+    const checkInDataRes = await reservationController.doResCheckIn(hotelId, reservationId);
+    if (checkInDataRes.status === 201) {
+        return res.status(checkInDataRes.status).send(checkInDataRes.checkInMsg);
+    } else {
+        return res.status(checkInDataRes.status).send(checkInDataRes.checkInMsg);
     }
 });
 

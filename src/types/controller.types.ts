@@ -6,6 +6,7 @@ import { IRates } from '../models/rates.model';
 import { IReservations } from '../models/reservations.model';
 import { IAvailabilityWithRooms } from '../models/availability.model';
 import { IGuests } from '../models/guests.model';
+import { IBookings } from '../models/bookings.model';
 export interface IHotelsData {
     status: number;
     allHotelsData?: Array<IHotel>;
@@ -76,6 +77,11 @@ export interface IReservationsData {
     reservationsData?: Array<IReservations>;
 }
 
+export interface IBookingsData {
+    status: number;
+    bookingsData?: Array<IBookings>;
+}
+
 export interface IReservationData {
     status: number;
     reservationData?: IReservations | null;
@@ -101,6 +107,16 @@ export interface IReservationsPayload extends IRateShopPayload {
         advancePayment: number;
         advancePaymentMode: string;
     };
+}
+
+export interface ICheckInResponse {
+    status: number;
+    checkInMsg: string;
+}
+
+export interface ICheckOutResponse {
+    status: number;
+    checkOutMsg: string;
 }
 
 export interface IRateShopSchema {
@@ -131,14 +147,43 @@ export interface IRateShopSchema {
     };
 }
 
+export interface ICheckOutPayload {
+    checkOut: string;
+    couponCode?: string;
+    voucherCode?: string;
+}
+
 export interface IReservationSchema extends IRateShopSchema {
     guestId: string;
-    currentStatus: string;
+    isResCheckedIn: string;
+    isResCheckedOut: string;
+    currentResStatus: string;
     confirmationType: string;
     createdBy?: string;
     paymentDetails: {
         advancePayment: number;
         advancePaymentMode: string;
+    };
+}
+
+export interface IBookingSchema extends IRateShopSchema {
+    guestId: string;
+    resId?: string;
+    currentBookingStatus: string;
+    createdBy?: string;
+    paymentDetails: {
+        advancePayment: number;
+        advancePaymentMode: string;
+        paymentBreakup?: {
+            totalCharges: number;
+            couponDiscount: number;
+            advancePayment: number;
+            taxAmount: number;
+            voucherAmountUsed: number;
+            totalPayable: number;
+            paymentMode: string;
+            remarks: string;
+        };
     };
 }
 

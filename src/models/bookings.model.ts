@@ -2,9 +2,9 @@ import { Document, Model, model, Schema } from 'mongoose';
 
 export interface IBookings extends Document {
     hotelId: number;
-    roomId: number;
-    currentStatus: string;
-    confirmationType: string;
+    roomIds: number;
+    resId?: number;
+    currentBookingStatus: string;
     checkIn: Date;
     checkOut: Date;
     totalNumDays: number;
@@ -29,7 +29,7 @@ export interface IBookings extends Document {
         couponDisPercentage: number;
         voucherAmount: number;
     };
-    paymentDetails?: {
+    paymentDetails: {
         advancePayment: number;
         advancePaymentMode: string;
         paymentBreakup?: {
@@ -86,9 +86,9 @@ const chargesSchema: Schema = new Schema({
 const bookingsSchema: Schema = new Schema(
     {
         hotelId: { type: Number, required: true },
-        roomId: { type: Number, required: true },
-        currentStatus: { type: String, required: true },
-        confirmationType: { type: String, required: true, default: 'grey' },
+        roomIds: { type: [Number], required: true },
+        resId: { type: String, required: false },
+        currentBookingStatus: { type: String, required: true },
         checkIn: { type: Date, required: true },
         checkOut: { type: Date, required: true },
         totalNumDays: { type: Number, required: true },
@@ -107,7 +107,7 @@ const bookingsSchema: Schema = new Schema(
         },
         paymentDetails: {
             type: paymentDetailsSchema,
-            required: false
+            required: true
         }
     },
     { timestamps: true }

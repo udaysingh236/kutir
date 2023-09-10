@@ -13,8 +13,11 @@ import {
     IRateShopResponse,
     IRateShopSchema,
     IReservationSchema,
-    IAvailabilityData
+    IAvailabilityData,
+    IBookingSchema,
+    ICheckInResponse
 } from '../types/controller.types';
+import Bookings from '../models/bookings.model';
 
 export async function getAllActiveResOfHotel(hotelId: number): Promise<IReservationsData> {
     try {
@@ -230,7 +233,7 @@ export async function doRateShoping(
                 rateShopInfo.couponCode
             );
             if (couponData.status === 200) {
-                rateShopResponse.chargesDetails.voucherAmount = couponData.couponData?.isValid
+                rateShopResponse.chargesDetails.couponDisPercentage = couponData.couponData?.isValid
                     ? couponData.couponData?.discountPer
                     : 0;
             }
@@ -262,12 +265,14 @@ export async function createRes(hotelId: number, resInfo: IReservationsPayload) 
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...rateShopResponse.rateShopResponse!,
             guestId: '',
-            currentStatus: '',
+            currentResStatus: '',
             confirmationType: 'grey',
             paymentDetails: {
                 advancePayment: 0,
                 advancePaymentMode: ''
-            }
+            },
+            isResCheckedIn: 'NO',
+            isResCheckedOut: 'NO'
         };
 
         session.startTransaction();
@@ -293,7 +298,7 @@ export async function createRes(hotelId: number, resInfo: IReservationsPayload) 
                 resInfo.paymentDetails.advancePaymentMode;
             reservationSchema.confirmationType = 'green';
         }
-        reservationSchema.currentStatus = 'ACTIVE';
+        reservationSchema.currentResStatus = 'ACTIVE';
 
         // Finally insert into reservation table
         const createReservationRes = await Reservations.create([reservationSchema], { session });
@@ -329,6 +334,70 @@ export async function createRes(hotelId: number, resInfo: IReservationsPayload) 
         await session.abortTransaction();
         return {
             status: 500
+        };
+    }
+}
+
+export async function doResCheckIn(hotelId: number, resId: string): Promise<ICheckInResponse> {
+    // start a session and do rest of the DB operations through it.
+    const session = await Reservations.startSession();
+    try {
+        const resData: IReservationSchema | null = await Reservations.findOne({
+            _id: resId,
+            hotelId: hotelId
+        }).lean(true);
+        if (resData) {
+            const currDate = new Date().toISOString().split('T')[0]; //YYYY-MM-DD
+            const chekInDate = new Date(resData.checkIn).toISOString().split('T')[0]; //YYYY-MM-DD
+            if (currDate !== chekInDate) {
+                logger.error(
+                    `Future date check in is not allowed current date ${currDate} and chek in date ${chekInDate}`
+                );
+                return {
+                    status: 404,
+                    checkInMsg: `Future date check in is not allowed current date ${currDate} and chek in date ${chekInDate}`
+                };
+            }
+            if (resData.isResCheckedIn === 'YES') {
+                logger.error(`Res is already checked in, resData is ${JSON.stringify(resData)}`);
+                return {
+                    status: 404,
+                    checkInMsg: `Res is already checked in, resData is ${JSON.stringify(resData)}`
+                };
+            }
+            const bookingSchema: IBookingSchema = {
+                ...resData,
+                currentBookingStatus: 'ACTIVE',
+                resId: resId
+            };
+            session.startTransaction();
+            const createBookingRes = await Bookings.create([bookingSchema], { session });
+            await Reservations.updateOne(
+                { _id: resId },
+                { $set: { isResCheckedIn: 'YES' } },
+                { session }
+            );
+            await session.commitTransaction();
+            session.endSession();
+            return {
+                checkInMsg: `Booking/ Check In done sucessfully ${JSON.stringify(
+                    createBookingRes
+                )}`,
+                status: 201
+            };
+        } else {
+            logger.info(`Not able to find resDate for hotel ID ${hotelId} and Res ID ${resId}`);
+            return {
+                status: 404,
+                checkInMsg: `Not able to find resDate for hotel ID ${hotelId} and Res ID ${resId}`
+            };
+        }
+    } catch (error) {
+        logger.error(`Error in doResCheckIn, error is ${error}`);
+        await session.abortTransaction();
+        return {
+            status: 500,
+            checkInMsg: `Error in doResCheckIn, error is ${error}`
         };
     }
 }

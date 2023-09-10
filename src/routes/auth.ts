@@ -39,7 +39,7 @@ router.get('/failure', (req, res) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     req.session?.destroy(function (err: any) {
         if (err) return res.redirect('/');
-        res.clearCookie('sid');
+        res.clearCookie('kutir-session');
         res.redirect('/login');
     });
 });

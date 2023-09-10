@@ -48,7 +48,7 @@ app.use((error: Errback, req: Request, res: Response, next: NextFunction) => {
     if (error) {
         logger.fatal(`Error middleware triggered, error was ${error}`);
         res.clearCookie('kutir-session');
-        res.redirect('/v1/auth/github');
+        res.redirect('/login');
     } else {
         next();
     }

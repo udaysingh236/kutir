@@ -8,7 +8,8 @@ export interface IAvailability extends Document {
         resfromDate: Date;
         restoDate: Date;
         resType: string;
-        reservationId: string;
+        reservationId?: string;
+        bookingId?: string;
     }[];
 }
 

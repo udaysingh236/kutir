@@ -3,7 +3,9 @@ import { Document, Model, model, Schema } from 'mongoose';
 export interface IReservations extends Document {
     hotelId: number;
     roomIds: number[];
-    currentStatus: string;
+    currentResStatus: string;
+    isResCheckedIn: string;
+    isResCheckedOut: string;
     confirmationType: string;
     checkIn: Date;
     checkOut: Date;
@@ -75,13 +77,15 @@ const reservationsSchema: Schema = new Schema(
     {
         hotelId: { type: Number, required: true },
         roomIds: { type: [Number], required: true },
-        currentStatus: { type: String, required: true, default: 'active' },
+        currentResStatus: { type: String, required: true, default: 'ACTIVE' },
         confirmationType: {
             type: String,
             required: true,
             default: 'grey'
         },
         checkIn: { type: Date, required: true },
+        isResCheckedIn: { type: String, required: true },
+        isResCheckedOut: { type: String, required: true },
         checkOut: { type: Date, required: true },
         totalNumDays: { type: Number, required: true },
         guestId: { type: String, required: true },
