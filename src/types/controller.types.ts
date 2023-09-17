@@ -176,6 +176,7 @@ export interface IBookingSchema extends IRateShopSchema {
         advancePaymentMode: string;
         paymentBreakup?: {
             totalCharges: number;
+            extraMattressCharge: number;
             couponDiscount: number;
             advancePayment: number;
             taxAmount: number;

@@ -35,7 +35,11 @@ export function validaterateBody(rateBody: IRates): boolean {
 }
 
 export function validateDates(checkIn: string, checkOut: string) {
-    return new Date(checkIn) > new Date() && new Date(checkIn) < new Date(checkOut);
+    return (
+        // Compare only dates not current time. Allow Reservation for today also
+        new Date(checkIn) >= new Date(new Date().toDateString()) &&
+        new Date(checkIn) < new Date(checkOut)
+    );
 }
 
 export function validateRateShopBody(rateShopBody: IRateShopPayload): boolean {
@@ -49,18 +53,21 @@ export function validateRateShopBody(rateShopBody: IRateShopPayload): boolean {
             typeof rateShopBody.checkOut === 'string'
         )
     ) {
+        logger.debug(`Validation error in numOfPersons numOfextraMattress`);
         return false;
     }
     if (
         Object.prototype.hasOwnProperty.call(rateShopBody, 'voucherCode') &&
         typeof rateShopBody.voucherCode !== 'string'
     ) {
+        logger.debug(`Validation error in voucherCode`);
         return false;
     }
     if (
         Object.prototype.hasOwnProperty.call(rateShopBody, 'couponCode') &&
         typeof rateShopBody.couponCode !== 'string'
     ) {
+        logger.debug(`Validation error in couponCode`);
         return false;
     }
     return validateDates(rateShopBody.checkIn, rateShopBody.checkOut);

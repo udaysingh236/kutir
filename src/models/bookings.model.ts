@@ -34,6 +34,7 @@ export interface IBookings extends Document {
         advancePaymentMode: string;
         paymentBreakup?: {
             totalCharges: number;
+            extraMattressCharge: number;
             couponDiscount: number;
             advancePayment: number;
             taxAmount: number;
@@ -54,6 +55,7 @@ const ratesSchema: Schema = new Schema({
 
 const paymentBreakupSchema: Schema = new Schema({
     totalCharges: { type: Number, required: true },
+    extraMattressCharge: { type: Number, required: true },
     couponDiscount: { type: Number, required: true },
     advancePayment: { type: Number, required: true },
     taxAmount: { type: Number, required: true },

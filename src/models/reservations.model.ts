@@ -45,18 +45,6 @@ const ratesSchema: Schema = new Schema({
     extraMattress: { type: Number, required: true }
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const paymentBreakupSchema: Schema = new Schema({
-    totalCharges: { type: Number, required: true },
-    couponDiscount: { type: Number, required: true },
-    advancePayment: { type: Number, required: true },
-    taxAmount: { type: Number, required: true },
-    voucherAmountUsed: { type: Number, required: true },
-    totalPayable: { type: Number, required: true },
-    paymentMode: { type: String, required: true },
-    remarks: { type: String, required: true }
-});
-
 const paymentDetailsSchema: Schema = new Schema({
     advancePayment: { type: Number, required: false },
     advancePaymentMode: { type: String, required: false }
@@ -81,7 +69,7 @@ const reservationsSchema: Schema = new Schema(
         confirmationType: {
             type: String,
             required: true,
-            default: 'grey'
+            default: 'GREY'
         },
         checkIn: { type: Date, required: true },
         isResCheckedIn: { type: String, required: true },

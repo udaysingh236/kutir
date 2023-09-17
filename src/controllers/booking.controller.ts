@@ -189,7 +189,7 @@ export async function createBooking(hotelId: number, bookingInfo: IReservationsP
                 { roomId: bookingInfo.roomIds[index], hotelId: hotelId },
                 {
                     $push: {
-                        bookings: {
+                        reservations: {
                             restoDate: toDate,
                             resfromDate: fromDate,
                             resType: 'GREEN',
@@ -269,16 +269,18 @@ export async function doCheckOut(
             }
 
             // Lets do the math again if the check out date is changed.
+            session.startTransaction();
             if (new Date(bookingData.checkOut) !== new Date(checkOutPayload.checkOut)) {
                 // Lets calulate number of days
                 const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
-                const diffDays = Math.round(
+                let diffDays = Math.round(
                     Math.abs(
                         (+new Date(checkOutPayload.checkOut) - +new Date(bookingData.checkIn)) /
                             oneDay
                     )
                 );
-                if (diffDays <= 0) {
+                diffDays = diffDays === 0 ? 1 : diffDays; // Same day Checkout, charge for whole 1 day.
+                if (diffDays < 0) {
                     logger.error(
                         `Error while check out, date diff is ${diffDays} from range ${bookingData.checkIn} - ${bookingData.checkOut}`
                     );
@@ -292,7 +294,27 @@ export async function doCheckOut(
                 bookingData.chargesDetails.totalDaysCharge =
                     diffDays * bookingData.rates.perDayCharge;
                 bookingData.chargesDetails.extraMattress =
-                    bookingData.rates.extraMattress * bookingData.numOfextraMattress;
+                    bookingData.rates.extraMattress * bookingData.numOfextraMattress * diffDays;
+
+                bookingData.checkOut = new Date(checkOutPayload.checkOut)
+                    .toISOString()
+                    .split('T')[0]; //YYYY-MM-DD
+                for (let index = 0; index < bookingData.roomIds.length; index++) {
+                    const avlUpdate = await Availability.updateOne(
+                        {
+                            roomId: bookingData.roomIds[index],
+                            hotelId: hotelId,
+                            'reservations.bookingId': bookingId
+                        },
+                        {
+                            $set: {
+                                'reservations.$.restoDate': bookingData.checkOut
+                            }
+                        },
+                        { session: session, upsert: true }
+                    );
+                    logger.debug(`avlUpdate: ${JSON.stringify(avlUpdate)}`);
+                }
             }
 
             if (checkOutPayload.voucherCode) {
@@ -320,39 +342,66 @@ export async function doCheckOut(
             }
 
             // Lets calculate the final charges
+            // Coupon discount
+            bookingData.paymentDetails = {
+                advancePayment: bookingData.paymentDetails.advancePayment,
+                advancePaymentMode: bookingData.paymentDetails.advancePaymentMode,
+                paymentBreakup: {
+                    totalCharges: 0,
+                    extraMattressCharge: 0,
+                    couponDiscount: 0,
+                    advancePayment: 0,
+                    taxAmount: 0,
+                    voucherAmountUsed: 0,
+                    totalPayable: 0,
+                    paymentMode: 'CASH',
+                    remarks: 'FOR TEST'
+                }
+            };
             bookingData.paymentDetails.paymentBreakup!.couponDiscount = bookingData.chargesDetails
                 .couponDisPercentage
-                ? (bookingData.chargesDetails.totalDaysCharge *
+                ? ((bookingData.chargesDetails.totalDaysCharge +
+                      bookingData.chargesDetails.extraMattress) *
                       bookingData.chargesDetails.couponDisPercentage) /
                   100
                 : 0;
+            // Final Voucher amount
             bookingData.paymentDetails.paymentBreakup!.voucherAmountUsed = bookingData
                 .chargesDetails.voucherAmount
                 ? bookingData.chargesDetails.voucherAmount
                 : 0;
+            // Final mattress amount
+            bookingData.paymentDetails.paymentBreakup!.extraMattressCharge = bookingData
+                .chargesDetails.extraMattress
+                ? bookingData.chargesDetails.extraMattress
+                : 0;
+            // Total days charges amount
             bookingData.paymentDetails.paymentBreakup!.totalCharges =
                 bookingData.chargesDetails.totalDaysCharge;
+            // Advance amount
             bookingData.paymentDetails.paymentBreakup!.advancePayment =
                 bookingData.paymentDetails.advancePayment;
 
             // Dont include advance payment, since it is also taxable
 
-            bookingData.paymentDetails.paymentBreakup!.taxAmount =
-                ((bookingData.paymentDetails.paymentBreakup!.totalCharges -
+            bookingData.paymentDetails.paymentBreakup!.taxAmount = Math.abs(
+                ((bookingData.paymentDetails.paymentBreakup!.totalCharges +
+                    bookingData.paymentDetails.paymentBreakup!.extraMattressCharge -
                     bookingData.paymentDetails.paymentBreakup!.couponDiscount -
                     bookingData.paymentDetails.paymentBreakup!.voucherAmountUsed) *
                     10) /
-                100;
+                    100
+            );
 
             bookingData.paymentDetails.paymentBreakup!.totalPayable =
                 bookingData.paymentDetails.paymentBreakup!.totalCharges +
+                bookingData.paymentDetails.paymentBreakup!.extraMattressCharge +
                 bookingData.paymentDetails.paymentBreakup!.taxAmount -
                 bookingData.paymentDetails.paymentBreakup!.couponDiscount -
                 bookingData.paymentDetails.paymentBreakup!.voucherAmountUsed -
                 bookingData.paymentDetails.paymentBreakup!.advancePayment;
 
             bookingData.currentBookingStatus = 'CLOSED';
-            session.startTransaction();
 
             const checkOutRes = await Bookings.replaceOne({ _id: bookingId }, bookingData, {
                 session

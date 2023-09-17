@@ -12,6 +12,7 @@ import voucherRouter from './routes/vouchers';
 import rateRouter from './routes/rates';
 import availbilityRouter from './routes/availability';
 import reservationRouter from './routes/reservation';
+import bookingRouter from './routes/booking';
 import authRouter from './routes/auth';
 import swaggerDocs from './utils/swagger';
 import * as auth from './services/auth.service';
@@ -44,6 +45,7 @@ app.use('/v1/hotels', auth.checkUserLoggedIn, voucherRouter);
 app.use('/v1/hotels', auth.checkUserLoggedIn, rateRouter);
 app.use('/v1/hotels', auth.checkUserLoggedIn, availbilityRouter);
 app.use('/v1/hotels', auth.checkUserLoggedIn, reservationRouter);
+app.use('/v1/hotels', auth.checkUserLoggedIn, bookingRouter);
 app.use((error: Errback, req: Request, res: Response, next: NextFunction) => {
     if (error) {
         logger.fatal(`Error middleware triggered, error was ${error}`);

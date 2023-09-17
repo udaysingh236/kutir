@@ -139,6 +139,7 @@ router.get('/:hotelId/booking', async (req: Request, res: Response) => {
  *       - checkIn
  *       - checkOut
  *       - numOfPersons
+ *       - numOfextraMattress:
  *       - firstName
  *       - lastName
  *       - email

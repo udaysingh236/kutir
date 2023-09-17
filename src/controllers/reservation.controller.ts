@@ -213,7 +213,7 @@ export async function doRateShoping(
         rateShopResponse.chargesDetails.totalDaysCharge =
             diffDays * rateShopResponse.rates.perDayCharge;
         rateShopResponse.chargesDetails.extraMattress =
-            rateShopResponse.rates.extraMattress * rateShopInfo.numOfextraMattress;
+            rateShopResponse.rates.extraMattress * rateShopInfo.numOfextraMattress * diffDays;
         // check voucher
         if (rateShopInfo.voucherCode) {
             const voucherData = await voucherController.getVoucherInfo(
@@ -366,9 +366,19 @@ export async function doResCheckIn(hotelId: number, resId: string): Promise<IChe
                 };
             }
             const bookingSchema: IBookingSchema = {
-                ...resData,
                 currentBookingStatus: 'ACTIVE',
-                resId: resId
+                resId: resId,
+                guestId: resData.guestId,
+                paymentDetails: resData.paymentDetails,
+                hotelId: resData.hotelId,
+                roomIds: resData.roomIds,
+                checkIn: resData.checkIn,
+                checkOut: resData.checkOut,
+                totalNumDays: resData.totalNumDays,
+                numOfPersons: resData.numOfPersons,
+                numOfextraMattress: resData.numOfextraMattress,
+                rates: resData.rates,
+                chargesDetails: resData.chargesDetails
             };
             session.startTransaction();
             const createBookingRes = await Bookings.create([bookingSchema], { session });
@@ -377,6 +387,21 @@ export async function doResCheckIn(hotelId: number, resId: string): Promise<IChe
                 { $set: { isResCheckedIn: 'YES' } },
                 { session }
             );
+            for (let index = 0; index < bookingSchema.roomIds.length; index++) {
+                await Availability.updateOne(
+                    {
+                        roomId: bookingSchema.roomIds[index],
+                        hotelId: hotelId,
+                        'reservations.reservationId': resId
+                    },
+                    {
+                        $set: {
+                            'reservations.$.bookingId': createBookingRes[0]._id
+                        }
+                    },
+                    { session: session, upsert: true }
+                );
+            }
             await session.commitTransaction();
             session.endSession();
             return {
