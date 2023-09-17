@@ -3,7 +3,21 @@ import * as auth from '../services/auth.service';
 const mcheckUserLoggedIn = jest
     .spyOn(auth, 'checkUserLoggedIn')
     .mockImplementation((req, res, next) => {
-        req.user = 'john.doe'; //for testing bypassing the auth
+        //for testing bypassing the auth
+        req.user = {
+            username: 'john.doe',
+            connectedSocialAccounts: 0,
+            google: {
+                email: '',
+                profileId: '',
+                photoUrl: ''
+            },
+            github: {
+                email: '',
+                profileId: '',
+                photoUrl: ''
+            }
+        };
         if (req.user) {
             next();
         }
